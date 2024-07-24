@@ -1,6 +1,6 @@
 from aqt.qt import QAction, QMessageBox, QVBoxLayout, QLabel, QDialog, QPushButton, QComboBox, QHBoxLayout
 
-from .utils import get_transcription_of_the
+from .utils import get_transcription_of_the, make_a_word_without_transcription
 from .FlowLayout import FlowLayout
 from .debug import debug
 from .local_dictionary import cache_transcription
@@ -10,6 +10,11 @@ class VariantsOfTranscription(QComboBox):
     def __init__(self, indexInTranscription, *args, **kwargs):
         super(VariantsOfTranscription, self).__init__(*args, **kwargs)
         self.indexInTranscription = indexInTranscription
+        self.addItem('Keep it as is')
+
+    def addItems(self, *args, **kwargs):
+        super().addItems(*args, **kwargs)
+        self.setCurrentIndex(1)
 
 
 class ChooseTranscriptionDialog (QDialog):
@@ -61,7 +66,7 @@ class ChooseTranscriptionDialog (QDialog):
             if self.transcriptions[i] is None or isinstance(self.transcriptions[i], str):
                 self.doneTranscriptions.append(self.flow_layout.getWidgetById(i).text())
             else: #list
-                curText = self.flow_layout.getWidgetById(i).currentText()
+                curText = self.flow_layout.getWidgetById(i).currentText() if self.flow_layout.getWidgetById(i).currentIndex() != 0 else make_a_word_without_transcription(self.words[i])
                 self.doneTranscriptions.append(curText)
                 cache_transcription(self.words[i], curText)
 

@@ -25,7 +25,7 @@ def search_in_cambridge_dictionary(word):
             if pron_element:
                 ipa_els = pron_element.find_all(class_="ipa")
                 for ipa_element in ipa_els:
-                    transcriptionText = ipa_element.text.strip()
+                    transcriptionText = ipa_element.text.strip().replace('·', '.')
                     if transcriptionText not in variantsOfTranscription:
                         variantsOfTranscription.append(transcriptionText)
 
