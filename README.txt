@@ -11,6 +11,5 @@ This method won't use cache as previous one, but won't let you choose the correc
 3) Load transcription(s) manually
 This method will search the transcription in cache for a start. If it does't find it, then it will search in the Cambridge Dictionary. It will let you choose the correct variant of transcription.
 
-
 4) Load transcription(s)
 This method will search the transcription in cache for a start. If it does't find it, then it will search in the Cambridge Dictionary. But it won't let you choose the correct variant. It will just choose the first one
