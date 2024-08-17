@@ -2,6 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 from .local_dictionary import cache_transcription
 from .utils import make_a_word_without_transcription
+from .debug import debug
+from urllib.parse import unquote
 
 headers = {
     'Accept-Language': 'en-US,en;q=0.8',
@@ -41,3 +43,69 @@ def search_in_cambridge_dictionary(word):
         trans = variantsOfTranscription
 
     return trans
+
+
+
+def select_appropriate_transcriptions(variants: list, tag: str):
+    res = []
+    return variants
+
+
+
+
+def search_in_oxford_dictionary(word, tag: str):
+    debug(tag)
+    variantsOfTranscription = [] # [[trans, tag], [trans2, tag2]]
+    number = 1
+    url_without_number = None
+
+    while True:
+        response = requests.get(('https://www.oxfordlearnersdictionaries.com/search/english/?q=' + word.lower()) if url_without_number is None else (url_without_number + "_" + str(number)), headers=headers, timeout=5)
+        #debug(('https://www.oxfordlearnersdictionaries.com/search/english/?q=' + word.lower()) if url_without_number is None else (url_without_number + "_" + str(number)))
+        if url_without_number is None:
+            url_without_number = unquote(response.url)[:-(len(word)+3)].rsplit('_', 1)[0]
+        #debug(response.url)
+        html = response.text
+        soup = BeautifulSoup(html, 'html.parser')
+        
+        webtop_el = soup.find('div', class_='webtop')
+        if webtop_el is None:
+            break
+
+        pos_el = webtop_el.find('span', class_='pos')
+        if pos_el is None:
+            break
+
+        n_am_el = webtop_el.find(class_='phons_n_am')
+        if n_am_el is None:
+            break
+        phon_el = n_am_el.find(class_='phon')
+        if phon_el is None:
+            break
+
+        
+
+        transcription = phon_el.text.strip()
+        transcription = transcription[1:] if transcription[0] == '/' else transcription
+        transcription = transcription[:-1] if transcription[-1] == '/' else transcription
+        if transcription not in map(lambda x: x[0], variantsOfTranscription):
+                variantsOfTranscription.append([transcription, pos_el.text.strip()])
+        number += 1
+
+    variantsOfTranscription = select_appropriate_transcriptions(variantsOfTranscription, tag)
+
+    trans = None
+    if len(variantsOfTranscription) == 0:
+        trans = word
+    elif len(variantsOfTranscription) == 1:
+        trans = variantsOfTranscription[0][0]
+
+        #cache transcription without other variants
+        cache_transcription (word, trans)
+    else:
+        #it will be cached when the user selects some variant
+        trans = list(map(lambda x: x[0], variantsOfTranscription))
+
+    return trans
+
+

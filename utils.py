@@ -1,6 +1,7 @@
 from aqt.qt import QInputDialog
 
 
+
 def prompt_user_to_select_variant(word, variants):
     item, ok = QInputDialog.getItem(None, "Select Transcription", f"Select the transcription for '{word}':", [*variants, 'NONE'], 0, False)
     if ok and item:
@@ -28,8 +29,18 @@ def is_first_sound_vowel(transcription):
     
 
 def get_transcription_of_the(next_transcription):
-    if next_transcription == None or not is_first_sound_vowel(next_transcription):
+    if next_transcription == None or not is_first_sound_vowel(next_transcription) or (isinstance(next_transcription, SpecialWord) and next_transcription.word=='the'):
         return "ðə"
     else:
         return "ðiː"
+
+def get_transcription_of_to(next_transcription):
+    if next_transcription == None or not is_first_sound_vowel(next_transcription) or (isinstance(next_transcription, SpecialWord) and next_transcription.word=='to'):
+        return "tə"
+    else:
+        return "tʊ"
     
+
+class SpecialWord:
+    def __init__(self, word):
+        self.word = word
